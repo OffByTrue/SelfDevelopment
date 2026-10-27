@@ -1,7 +1,8 @@
 # Output Folders
 */out
 
-
+# Output Files
+*/*.class
 
 # IntelliJ IDEA
 /.idea
