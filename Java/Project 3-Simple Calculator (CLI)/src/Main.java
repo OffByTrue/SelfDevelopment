@@ -2,11 +2,11 @@ import java.util.Scanner;
 class Main {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        while(true) {
-//            if(input.nextInt() == -1) break;   REQUEST FOR NEXT CALC Check
+        int again =0;
+        while(again==0) {
             System.out.println("Enter two numbers");
-            int a = input.nextInt();
-            int b = input.nextInt();
+            double a = input.nextDouble();
+            double b = input.nextDouble();
             System.out.println("Enter operation");
             System.out.println("1. Addition");
             System.out.println("2. Subtraction");
@@ -40,16 +40,19 @@ class Main {
                 default:
                     System.out.println("Invalid operation");
             }
+            System.out.print("Do you want to continue? (y/n): ");
+            again = (input.next().charAt(0)=='y')? 0:-1;
         }
+
     }
-    static double add(int a, int b) {return a+b;}
-    static double sub(int a,int b){return a-b;}
-    static double mul(int a, int b){return a*b;}
-    static double div(int a,int b)throws Exception{
+    static double add(double a, double b) {return a+b;}
+    static double sub(double a,double b){return a-b;}
+    static double mul(double a, double b){return a*b;}
+    static double div(double a,double b)throws Exception{
         if(a==0 || b==0) throw new Exception("Division by zero is not allowed");
         return a/b;
     }
-    static double mod(int a,int b)throws Exception{
+    static double mod(double a,double b)throws Exception{
         if(a==0 || b==0) throw new Exception("Undefined: Division by zero is not allowed");
         return a%b;
     }
