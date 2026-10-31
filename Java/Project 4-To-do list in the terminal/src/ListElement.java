@@ -6,4 +6,7 @@ public class ListElement {
         this.name=name;
         this.description=description;
     }
+    public void show(){
+        System.out.println(value+" "+name+" "+description);
+    }
 }

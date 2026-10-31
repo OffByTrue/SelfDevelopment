@@ -1,8 +1,9 @@
 # Output Folders
-*/out/
+**/out
 
 # Output Files
-*.class
+**/*.class
 
 # IntelliJ IDEA
-/.idea
+**/.idea
+**/*.iml

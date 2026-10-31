@@ -4,121 +4,104 @@ import java.util.Scanner;
 
 class Main {
     public static HashMap<Integer, ListElement> list = new HashMap<>();
-    public static File file;
-    static int value=0;
-    public static BufferedWriter writer;
-    public static BufferedReader reader;
-    final static String location="src/list.txt";
-    public static void main(String[] args) {
-        Scanner sc=new Scanner(System.in);
-        LoadFile();
-//        ListElement test=new ListElement(1,"KKK","This is a test");
-//        WriteToFile(test);
-//        WriteToFile(1,"Test","This is a test");
-//        WriteToFile(2,"Test2","This is a test2");
-//        WriteToFile(3,"Test3","This is a test3");
-//
-        for (ListElement element : list.values()) {
-            System.out.println(element.value + " " + element.name + " " + element.description);
-        }
-        int choice=0;
-        while(choice!=6){
-            System.out.println("1. Add element\n2. Remove element\n3. Update element\n4. Display list\n5. Reload file\n6. Exit");
-        switch(choice){
-            case 1:
-                System.out.println("Enter Title: ");
-                String title=sc.nextLine();
-                System.out.println("Enter Description: ");
-                String description=sc.nextLine();
-                value=list.size()+1;
-                list.put(value,new ListElement(value,title,description));
-                break;
-            case 2:
-                System.out.println("Enter Id: ");
-                value=sc.nextInt();
-                System.out.println("This will be removed--");
-                list.remove(value);
+    final static String location = "src/list.txt";
 
-                break;
-            case 3:
-                System.out.println("3.Update element");
-                break;
-            case 4:
-                System.out.println("4.Display list");
-                break;
-            default:
-                break;
-        }
-        ReloadFile();
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        loadFile();
+
+        int choice = 0;
+        while (choice != 6) {
+            System.out.println("1. Add element\n2. Remove element\n3. Update element\n4. Display list\n5. Reload file\n6. Exit");
+            choice = Integer.parseInt(sc.nextLine().trim());
+
+            switch (choice) {
+                case 1: {
+                    System.out.println("Enter Title: ");
+                    String title = sc.nextLine();
+                    System.out.println("Enter Description: ");
+                    String description = sc.nextLine();
+                    int id = nextId();
+                    list.put(id, new ListElement(id, title, description));
+                    saveFile();
+                    break;
+                }
+                case 2: {
+                    System.out.println("Enter Id: ");
+                    int id = Integer.parseInt(sc.nextLine().trim());
+                    if (list.remove(id) != null) {
+                        System.out.println("Removed " + id);
+                        saveFile();
+                    } else {
+                        System.out.println("No such id");
+                    }
+                    break;
+                }
+                case 3: {
+                    System.out.println("Enter Id: ");
+                    int id = Integer.parseInt(sc.nextLine().trim());
+                    ListElement le = list.get(id);
+                    if (le == null) {
+                        System.out.println("No such id");
+                        break;
+                    }
+                    System.out.println("Enter new Title: ");
+                    le.name = sc.nextLine();
+                    System.out.println("Enter new Description: ");
+                    le.description = sc.nextLine();
+                    saveFile();
+                    break;
+                }
+                case 4:
+                    for (ListElement e : list.values()) e.show();
+                    break;
+                case 5:
+                    loadFile();
+                    break;
+                default:
+                    break;
+            }
         }
     }
-    static void ReloadFile(){
-        try {
-            reader.close();
-            writer.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        LoadFile();
+
+    static int nextId() {
+        int max = 0;
+        for (int k : list.keySet()) max = Math.max(max, k);
+        return max + 1;
     }
-    static void LoadFile(){
-        file = new File(location);
-        if(!file.exists()){
+
+    static void loadFile() {
+        File file = new File(location);
+        list = new HashMap<>();
+        if (!file.exists()) {
             try {
                 file.createNewFile();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.out.println("Error creating file");
             }
+            return;
         }
-        else{
-            System.out.println("File already exists");
-        }
-        System.out.println("Trying to init Writer and Reader");
-        try{
-
-            writer=new BufferedWriter(new FileWriter(file));
-            reader= new BufferedReader(new FileReader(file));
-            System.out.println("Connected");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        ParseFileToList();
-    }
-    static boolean WriteToFile(int value,String name,String description){
-        try {
-            writer.write(value+","+name+","+description);
-            writer.newLine();
-            return true;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    static boolean WriteToFile(ListElement ele){
-        try {
-            writer.write(ele.value+","+ele.name+","+ele.description);
-            writer.newLine();
-            return true;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static int ParseFileToList(){
-        int count=0;
-        try {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-            list =new  HashMap<>();
-            while((line=reader.readLine())!=null){
-                String[] parts=line.split(",");
-                int value=Integer.parseInt(parts[0]);
-                String name=parts[1];
-                String description=parts[2];
-                list.put(value,new ListElement(value,name,description));
-                count++;
+            while ((line = reader.readLine()) != null) {
+                if (line.isBlank()) continue;
+                String[] parts = line.split(",", 3);
+                int id = Integer.parseInt(parts[0]);
+                list.put(id, new ListElement(id, parts[1], parts.length > 2 ? parts[2] : ""));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return count;
+    }
+
+    static void saveFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(location))) {
+            for (ListElement ele : list.values()) {
+                writer.write(ele.value + "," + ele.name + "," + ele.description);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
